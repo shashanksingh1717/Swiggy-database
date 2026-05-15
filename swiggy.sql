@@ -1,5 +1,5 @@
 use swiggy;
-select * from;
+select * from database;
 select name , city from database;
 select * from database
 where city = "sirsa";
