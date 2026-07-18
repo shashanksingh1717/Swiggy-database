@@ -1,4 +1,4 @@
-# 🍛 Swiggy Restaurant Analytics — SQL + Interactive Dashboard
+  # 🍛 Swiggy Restaurant Analytics — SQL + Interactive Dashboard
 
 > A data analytics project exploring **61,425 Indian restaurants** from the Swiggy platform using SQL queries and an interactive HTML dashboard.
 
@@ -243,6 +243,12 @@ LIMIT 10;
 
 ![Project Screenshot](01-hero-headline.jpeg)
 ![Project_Screenshot](02-city-rating-cost.jpeg)
+![Project_Screenshot](03-cuisine-report.jpeg)
+![Project_Screenshot](04-city-quality-heatmap.jpeg)
+![Project_Screenshot](05-sql-query-spotlight.jpeg)
+![Project_Screenshot](06-hall-of-fame-scorecard.jpeg)
+
+
 
 ## 📋 Requirements
 
