@@ -241,6 +241,8 @@ LIMIT 10;
 
 ---
 
+![Project Screenshot](01-hero-headline.jpeg)
+
 ## 📋 Requirements
 
 - **SQL:** MySQL 8+ / MariaDB / SQLite (any SQL-compatible engine)
