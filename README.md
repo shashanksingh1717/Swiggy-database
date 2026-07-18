@@ -241,7 +241,7 @@ LIMIT 10;
 
 ---
 
-![Project Screenshot](01-hero-headline.jpeg)
+![Project Screenshot](Dashboard_screenshot/01-hero-headline.jpeg)
 
 
 
