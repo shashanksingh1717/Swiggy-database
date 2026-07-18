@@ -242,6 +242,7 @@ LIMIT 10;
 ---
 
 ![Project Screenshot](01-hero-headline.jpeg)
+![Project_Screenshot](02-city-rating-cost.jpeg)
 
 ## 📋 Requirements
 
