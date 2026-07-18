@@ -242,6 +242,11 @@ LIMIT 10;
 ---
 
 ![Project Screenshot](Dashboard_screenshot/01-hero-headline.jpeg)
+![Project_Screenshot](Dashboard_screenshot/02-city-rating-cost.jpeg)
+![Project_Screenshot](Dashboard_screenshot/03-cuisine-report.jpeg)
+![Project_Screenshot](Dashboard_screenshot/04-city-quality-heatmap.jpeg)
+![Project_Screenshot](Dashboard_screenshot/05-sql-query-spotlight.jpeg)
+![Project_Screenshot](Dashboard_screenshot/06-hall-of-fame-scorecard.jpeg)
 
 
 
