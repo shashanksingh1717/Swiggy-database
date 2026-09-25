@@ -1,245 +1,96 @@
-  # 🍛 Swiggy Restaurant Analytics — SQL + Interactive Dashboard
+# Swiggy Restaurant Market Analysis & Dashboard
 
-> A data analytics project exploring **61,425 Indian restaurants** from the Swiggy platform using SQL queries and an interactive HTML dashboard.
-
----
-
-## 📌 Project Overview
-
-This project analyzes the Swiggy restaurant dataset to uncover patterns in pricing, ratings, cuisine popularity, and city-level food market dynamics across **8 major Indian cities**.
-
-Two deliverables are included:
-- **`swiggy.sql`** — structured SQL queries for data exploration
-- **`swiggy_dashboard.html`** — an interactive editorial-style data dashboard built in pure HTML/CSS/JS
+**An end-to-end analysis of 61,425 restaurants across 8 Indian cities — from a single raw CSV export to a queryable dataset and a decision-ready dashboard.**
 
 ---
 
-## 📂 Project Structure
+## 1. The Problem
+
+Swiggy's public restaurant listings data is exactly what it sounds like: a flat export of every restaurant on the platform — name, city, rating, rating count, cuisine, cost for two — with no structure imposed on top of it. On its own, a spreadsheet like that answers almost nothing. You can't tell a category manager which cities are underperforming on quality, which cuisines are oversaturated versus under-served, or where the real "budget vs. premium" split actually sits, just by scrolling 61K rows.
+
+The goal of this project was to turn that flat export into something a city ops lead or a cuisine category manager could actually query and act on — a proper SQL layer for analysis, plus a single dashboard that surfaces the findings without anyone having to write a query themselves.
+
+## 2. The Data
+
+One raw source, 61,425 rows:
+
+| Column | What it holds |
+|---|---|
+| `id` | Unique restaurant ID |
+| `name` | Restaurant name |
+| `city` | City of operation (8 cities total) |
+| `rating` | Customer rating, out of 5.0 |
+| `rating_count` | Total number of ratings received |
+| `cuisine` | Primary cuisine type |
+| `cost` | Average cost for two, in ₹ |
+| `link` | Swiggy listing URL |
+
+It's a single table, but it's a deceptively rich one — cost, rating, rating volume, cuisine and city all interact with each other in ways that only show up once you start grouping and filtering.
+
+## 3. What I Built
+
+### a) SQL analysis (`swiggy.sql`)
+I loaded the CSV into a table named `database` and worked through the analysis in layers, each one building on the last:
+- **Basic retrieval and filters** — pulling records by city, by rating threshold, by budget cap.
+- **Aggregations** — `COUNT`, `AVG`, `MIN`, `MAX` grouped by city and by cuisine, to get a first read on market size and price bands.
+- **City intelligence** — `COUNT(DISTINCT city)`, then `GROUP BY ... HAVING` to isolate cities that clear a quality bar (avg rating > 4.5).
+- **Compound filtering** — `AND` / `IN` / `BETWEEN` combinations to answer sharper questions like "which restaurants have both a strong rating *and* real engagement volume," not just one or the other.
+- **Cuisine-level thresholds** — `GROUP BY ... HAVING COUNT(*) > 100` to separate cuisines that are a genuine market segment from ones that are just a handful of listings.
+
+The file reads as a progression from simple `SELECT` statements to compound, multi-condition queries — meant to be run against any MySQL / MariaDB / SQLite instance after importing the CSV.
+
+### b) Interactive dashboard (`swiggy_dashboard.html`)
+Rather than leave the findings as query output, I built a single-page, editorial-style dashboard in pure HTML/CSS/JS — no frameworks, no build step, just open the file in a browser. It mirrors the SQL findings visually:
+- A city-wise bar chart of restaurant counts
+- A rating-distribution breakdown across all 61K restaurants
+- A cost bubble chart for the Budget / Mid-Range / Luxury segments
+- A top-10 cuisine grid with count, average rating, and average cost side by side
+- A city heatmap colour-coded by rating intensity
+- Six "SQL spotlight" cards — the query itself, syntax-highlighted, next to the insight it produces
+- A "Hall of Fame" of top-rated restaurants by vote count
+- A full city scorecard for side-by-side comparison
+
+## 4. What the Numbers Say
+
+- **61,425 restaurants** across **8 cities**, averaging **₹298** for a meal for two and a **4.02★** rating nationally — but only **209 restaurants** hold a perfect 5.0.
+- **North Indian is the dominant cuisine by volume** (10,485 outlets), but it isn't the best-rated one — **Desserts** edges it out with a 4.12★ average, suggesting dessert spots convert satisfaction into ratings more reliably than the biggest category does.
+- **Bangalore is the largest single market** (6,580 restaurants), but **Mumbai posts the highest average rating** (4.08★) despite being the smallest of the major metros by listing count — and it's also the most expensive city to eat in (₹340 avg), which reads less like "expensive food is worse" and more like a market where quality and price are both structurally higher.
+- **Hyderabad is the outlier on quality**: the second-largest market by restaurant count, but the lowest average rating (3.82★) of the 8 cities — a gap worth investigating rather than assuming is noise.
+- **The market is overwhelmingly budget-to-mid**: 54.5% of restaurants sit under ₹300 for two, another 42.7% fall between ₹300–₹700, and only **2.8%** clear ₹700 — luxury dining is a genuinely small slice of Swiggy's restaurant base, not a rounding error but not the market either.
+
+## 5. Tech Stack
+
+`SQL` (MySQL / MariaDB / SQLite-compatible) for the full analysis layer · `HTML / CSS / JavaScript` (no frameworks) for the interactive dashboard · plain `CSV` as the single source of truth.
+
+## 6. Repo Structure
 
 ```
 swiggy-analytics/
 ├── database.csv              # Raw dataset (61,425 restaurant records)
-├── swiggy.sql                # All SQL queries used in analysis
-├── swiggy_dashboard.html     # Interactive visualization dashboard
+├── swiggy.sql                # Full SQL analysis, from basic filters to compound queries
+├── swiggy_dashboard.html     # Interactive dashboard mirroring the SQL findings
 └── README.md
 ```
 
----
+## 7. How to Run It
 
-## 🗃️ Dataset
-
-**File:** `database.csv`  
-**Records:** 61,425 restaurants  
-**Source:** Swiggy (India's food delivery platform)
-
-| Column | Description |
-|---|---|
-| `id` | Unique restaurant ID |
-| `name` | Restaurant name |
-| `city` | City of operation |
-| `rating` | Customer rating (out of 5.0) |
-| `rating_count` | Total number of ratings |
-| `cuisine` | Primary cuisine type |
-| `cost` | Average cost for two (₹) |
-| `link` | Swiggy listing URL |
-
----
-
-## 🧮 SQL Analysis — `swiggy.sql`
-
-The SQL file covers a full spectrum of query techniques:
-
-### 🔍 Basic Retrieval
+**SQL:**
 ```sql
--- View all records
-SELECT * FROM database;
-
--- Select specific columns
-SELECT name, city FROM database;
-
--- Filter by city
-SELECT * FROM database WHERE city = "Sirsa";
-```
-
-### ⭐ Rating & Quality Filters
-```sql
--- Top rated restaurants
-SELECT name, rating FROM database
-WHERE rating > 4.5;
-
--- High engagement restaurants
-SELECT name, rating_count FROM database
-WHERE rating_count > 1000;
-```
-
-### 💰 Cost Analysis
-```sql
--- Budget-friendly options
-SELECT * FROM database WHERE cost <= 300;
-
--- Cost range by cuisine
-SELECT cuisine, MIN(cost) AS min_cost, MAX(cost) AS max_cost
-FROM database
-GROUP BY cuisine;
-```
-
-### 📊 Aggregations & Grouping
-```sql
--- Total restaurant count
-SELECT COUNT(*) AS total_res FROM database;
-
--- Average meal cost
-SELECT AVG(cost) AS avg_cost FROM database;
-
--- City-wise average rating
-SELECT city, AVG(rating) AS avg_rating
-FROM database
-GROUP BY city;
-
--- City-wise restaurant count
-SELECT city, COUNT(*) AS count_res
-FROM database
-GROUP BY city;
-```
-
-### 🏙️ City Intelligence
-```sql
--- Unique cities in dataset
-SELECT COUNT(DISTINCT city) AS unique_cities FROM database;
-
--- Cities with avg rating > 4.5
-SELECT city, AVG(rating)
-FROM database
-GROUP BY city
-HAVING AVG(rating) > 4.5;
-```
-
-### 🔎 Advanced Filtering
-```sql
--- Multi-condition filter
-SELECT * FROM database
-WHERE rating > 4 AND rating_count > 3000;
-
--- Range filter
-SELECT * FROM database
-WHERE rating_count BETWEEN 3000 AND 10000;
-
--- Multi-city filter
-SELECT * FROM database
-WHERE city IN ("Mumbai", "Delhi", "Goa", "Pune");
-
--- Popular cuisine types
-SELECT cuisine, COUNT(*) AS total_restaurants
-FROM database
-GROUP BY cuisine
-HAVING COUNT(*) > 100;
-```
-
----
-
-## 📈 Key Findings
-
-| Metric | Value |
-|---|---|
-| Total Restaurants | 61,425 |
-| Cities Covered | 8 |
-| Average Cost for Two | ₹298 |
-| National Avg Rating | 4.02 ★ |
-| Perfect 5.0 Rated | 209 restaurants |
-| Most Popular Cuisine | North Indian (10,485 outlets) |
-| Highest Rated Cuisine | Desserts (avg 4.12 ★) |
-| Largest City Market | Bangalore (6,580 restaurants) |
-| Top Quality City | Mumbai (avg 4.08 ★) |
-
-### 💸 Price Segment Breakdown
-| Segment | Range | Count | Share |
-|---|---|---|---|
-| Budget | < ₹300 | 33,452 | 54.5% |
-| Mid-Range | ₹300–₹700 | 26,224 | 42.7% |
-| Luxury | > ₹700 | 1,749 | 2.8% |
-
-### 🏙️ City-wise Snapshot
-| City | Restaurants | Avg Rating | Avg Cost |
-|---|---|---|---|
-| Bangalore | 6,580 | 4.02 ★ | ₹312 |
-| Chennai | 4,849 | 4.03 ★ | ₹278 |
-| Delhi | 4,592 | 3.95 ★ | ₹320 |
-| Hyderabad | 4,489 | 3.82 ★ | ₹295 |
-| Pune | 3,765 | 3.98 ★ | ₹286 |
-| Kolkata | 3,160 | 4.06 ★ | ₹268 |
-| Mumbai | 2,335 | 4.08 ★ | ₹340 |
-| Ahmedabad | 1,291 | 3.98 ★ | ₹260 |
-
----
-
-## 🖥️ Interactive Dashboard — `swiggy_dashboard.html`
-
-An editorial-style single-page dashboard built with pure HTML, CSS, and JavaScript — no frameworks or build tools required.
-
-### Features
-- 📊 **City Bar Chart** — restaurant count per city with proportional fill bars
-- ⭐ **Rating Distribution** — visual breakdown of all 61K restaurants by rating band
-- 💰 **Cost Bubble Chart** — proportional bubbles for Budget / Mid / Luxury segments
-- 🍛 **Cuisine Grid** — top 10 cuisines with count, average rating, and average cost
-- 🗺️ **City Heatmap** — colour-coded rating intensity across 8 cities
-- 🔍 **SQL Spotlight** — 6 interactive query cards with syntax-highlighted SQL and inline insights
-- 🏆 **Hall of Fame** — top rated restaurants by vote count
-- 📋 **City Scorecard** — multi-metric comparison table
-
-### How to Run
-No installation needed. Just open the file in any modern browser:
-
-```bash
-# Clone the repo
-git clone https://github.com/your-username/swiggy-analytics.git
-cd swiggy-analytics
-
-# Open dashboard (macOS)
-open swiggy_dashboard.html
-
-# Open dashboard (Linux)
-xdg-open swiggy_dashboard.html
-
-# Open dashboard (Windows)
-start swiggy_dashboard.html
-```
-
----
-
-## 🛠️ SQL Concepts Covered
-
-| Concept | Used In |
-|---|---|
-| `SELECT`, `FROM`, `WHERE` | Basic filtering |
-| `AND`, `OR`, `IN`, `BETWEEN` | Compound conditions |
-| `GROUP BY`, `HAVING` | Aggregation & filtering groups |
-| `ORDER BY`, `LIMIT` | Sorting & pagination |
-| `COUNT`, `AVG`, `MIN`, `MAX` | Aggregate functions |
-| `COUNT(DISTINCT ...)` | Unique value counting |
-| `CASE WHEN` | Conditional segmentation |
-
----
-
-## 🚀 How to Use the SQL File
-
-Run the queries against any MySQL / MariaDB / SQLite database after importing the CSV:
-
-```sql
--- 1. Create and use the database
 CREATE DATABASE swiggy;
 USE swiggy;
-
--- 2. Import the CSV into a table named `database`
---    (use MySQL Workbench, DBeaver, or CLI)
-
--- 3. Run any query from swiggy.sql
+-- import database.csv into a table named `database`
+-- then run any query from swiggy.sql, e.g.:
 SELECT name, city, rating FROM database
 WHERE rating > 4.5
 ORDER BY rating DESC
 LIMIT 10;
 ```
 
+**Dashboard:** no installation needed — just open `swiggy_dashboard.html` in any modern browser.
+
 ---
+
+## 8. Screenshots
 
 ![Project Screenshot](Dashboard_screenshot/01-hero-headline.jpeg)
 ![Project_Screenshot](Dashboard_screenshot/02-city-rating-cost.jpeg)
@@ -248,16 +99,12 @@ LIMIT 10;
 ![Project_Screenshot](Dashboard_screenshot/05-sql-query-spotlight.jpeg)
 ![Project_Screenshot](Dashboard_screenshot/06-hall-of-fame-scorecard.jpeg)
 
-
-
-
 ## 📋 Requirements
 
 - **SQL:** MySQL 8+ / MariaDB / SQLite (any SQL-compatible engine)
 - **Dashboard:** Any modern browser (Chrome, Firefox, Edge, Safari)
 - **No Python, Node.js, or backend required**
-
----
+- ---
 
 ## 🤝 Contributing
 
